@@ -11,7 +11,7 @@ sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 archivesBaseName = project.name.toLowerCase()
-version = "${project.version}-r${project.apiVersion}"
+version = "${project.version}"
 
 repositories {
     mavenCentral()
@@ -19,10 +19,15 @@ repositories {
         name = 'sponge'
         url = 'http://repo.spongepowered.org/maven'
     }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/repositories/public/'
+    }
 }
 
 dependencies {
-    compile "org.spongepowered:spongeapi:${project.apiVersion}"
+    compile 'org.slf4j:slf4j-api:1.7.18'
+    compile 'ninja.leaping.configurate:configurate-core:3.1.1'
 }
 
 configure([compileJava, compileTestJava]) {
