@@ -45,7 +45,32 @@ public class CommentedDefaultNode<T> extends DefaultNode<T> {
 
     public static class Builder<T> extends DefaultNode.Builder<T> {
 
-        private String comment = "";
+        private String comment = null;
+
+        @Override
+        public Builder<T> key(String key) {
+            return (Builder<T>) super.key(key);
+        }
+
+        @Override
+        public Builder<T> value(T value) {
+            return (Builder<T>) super.value(value);
+        }
+
+        @Override
+        public Builder<T> type(Optional<Class<T>> type) {
+            return (Builder<T>) super.type(type);
+        }
+
+        /**
+         * Sets the comment for the {@link CommentedDefaultNode}
+         * @param comment The comment to register.
+         * @return The builder.
+         */
+        public Builder<T> comment(String comment) {
+            this.comment = comment;
+            return this;
+        }
 
         /**
          * Build the {@link DefaultNode}.

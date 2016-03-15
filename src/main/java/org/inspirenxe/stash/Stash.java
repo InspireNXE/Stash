@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.inspirenxe.stash.nodes.CommentedDefaultNode;
@@ -77,32 +78,12 @@ public class Stash {
      * Loads the configuration file.
      * @return {@link Stash} for chaining.
      */
-    @SuppressWarnings("unchecked")
     public Stash load() {
         try {
             rootNode = loader.load();
         } catch (IOException e) {
             logger.error("Unable to load configuration!", e);
         }
-        defaultNodes.stream().filter(entry -> entry.value != null).forEach(entry -> {
-            final ConfigurationNode node = getChildNode(entry.key);
-            if (node.getValue() == null) {
-                if (entry.type.isPresent()) {
-                    try {
-                        getChildNode(entry.key).setValue(TypeToken.of((Class<Object>) entry.type.get()), entry.value);
-                        if (entry instanceof CommentedDefaultNode && loader instanceof CommentedConfigurationNode) {
-                            ((CommentedConfigurationNode) getChildNode(entry.key)).setComment(((CommentedDefaultNode) entry).comment);
-                        }
-                    } catch (ObjectMappingException e) {
-                        logger.warn("Unable to map TypeToken!", e);
-                    }
-                } else {
-                    if (entry instanceof CommentedDefaultNode) {
-                        ((CommentedConfigurationNode) getChildNode(entry.key)).setComment(((CommentedDefaultNode) entry).comment);
-                    }
-                }
-            }
-        });
         return this;
     }
 
@@ -110,7 +91,27 @@ public class Stash {
      * Saves the configuration file.
      * @return {@link Stash} for chaining.
      */
+    @SuppressWarnings("unchecked")
     public Stash save() {
+        defaultNodes.stream().filter(entry -> entry.value != null).forEach(entry -> {
+            final ConfigurationNode node = getChildNode(entry.key);
+            if (node.getValue() == null) {
+                if (entry.type.isPresent()) {
+                    try {
+                        getChildNode(entry.key).setValue(TypeToken.of((Class<Object>) entry.type.get()), entry.value);
+                        if (entry instanceof CommentedDefaultNode && loader instanceof HoconConfigurationLoader) {
+                            ((CommentedConfigurationNode) this.getChildNode(entry.key)).setComment(((CommentedDefaultNode) entry).comment);
+                        }
+                    } catch (ObjectMappingException e) {
+                        logger.warn("Unable to map TypeToken!", e);
+                    }
+                } else {
+                    if (entry instanceof CommentedDefaultNode && loader instanceof HoconConfigurationLoader) {
+                        ((CommentedConfigurationNode) this.getChildNode(entry.key)).setComment(((CommentedDefaultNode) entry).comment);
+                    }
+                }
+            }
+        });
         try {
             loader.save(rootNode);
         } catch (IOException e) {
