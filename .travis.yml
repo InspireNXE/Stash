@@ -6,6 +6,13 @@ jdk: oraclejdk8
 
 install: true
 script: ./gradlew build
+after_success:
+  - "[[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_REPO_SLUG == InspireNXE/Stash ]] && [[ $TRAVIS_BRANCH == master ]] && gradle :uploadArchives"
 
 notifications:
   email: false
+
+env:
+  global:
+    - secure: "CiBVrZUtCO2WPOOhsf282792VP/BMvb4ytm7HYGJ1xDkb3fE+Ej5XCZ1SKhO/BTUt8Yy5uy+zHA+468cQex26+GFuhrATq2EfNBMKuaWX9WHQkfLph2TfB3Om9WoVN68mvvTGTJ7aPtQ4PgfPkTdTL3LZGi8V5PGOr9SO3E9TLu2q2sALvfEV5CMhyuwi2ORjrfWYqD9x3CX/eK4YFBV3Iv9ZbO85ZVrHRk/ODjdbvf/huqhGZuz3hZeCZ9/OgqhUXyWyjTeW/4FbKwQpa1QsS/YNd+/BJ4yCCyn9uEhIimKZD92HGGTyDMwuFBlKkeptxCNRxSRPaC7RKFXpXzGYHFAHEEBOxMxV8tAr76cxWwe9aBWDN1aQyW9M4ku+UtWiqAULfdkAdPuuXg8Z80sSTeHrBJpYb2FbSSENU6+PAE1Q1Y39XiVwnbOja14d07/qA+nvV73eX0ljZ9kGL8nXkRT58fGt4tP+EDzadISRxTQ44lBwLzF0bmm74/5CCS51e8yH5RAwSYp3h1nkKLHOssUIaZqD/v63STvsZtMTasvJbF1SIITnv24qPs97xyKfVWYxOUXq8oX1D2CAiT7NOlo9XiGAhXqGEOPjM9Fus8jSB4yXpIAPNQPp1PlqWrRIyh7YCvKSi+24Ycp7LaX7L20JqPZzNfR/ELURnRwJFg="
+    -   secure: "oPVcEfsLMDzkqOMhU6flCs3GVupQl0d0ObGMOr390v3uzOvrluucHddMsWl+itGnwcE96rP/1KkiSh0DwmcisFToo/sH/NusGTmLAtRTmuRNz2VoL4flbWa35vS55uM0JWSOZ4hLplfEwBEslqmx5v2iIX8eFoheYDffKMrrqgJkg+gl76ogr3YxFMpy0y+ND0TynosvpRp/ex6JhvNJSiPjJVjynInQ9PxPh7c2FN7UwaYvA8OWyUJciXHbDZzIpjXYO5Pe5p0DcW2RwttconyaZWxnWNr1UlskSXGDzKhJIkoO0IxCZ+v2zheiIWVY+C4A1Set1VfQAvXMmoLv8UQG3T4TDHK1KVX0k77nVmQ7p6eU44LAuQqjkSD8g/di4U75r6u6TAEaBRMcvMvdxtpTSwhvKWWqkRzczOUrbMWRaSYOEdCvn7GVaYF1zAyReoI4K921eVksZbhiIljJjCrD7zU1qHl5vrKW2axw8JxCaELY/Xtf6pBQC9TQa0bELyWOipYtQv39MOneuiIs9+YKj8qwczzebnpwP2hn9yS/FDrNDoiMj2HzCJdL1tGkDAUFpSVt67vZbw4vmEnTAex9xIHwvA2tRQTkZW760V69XMpXcEsSVRFczeknwkYqtvJ3PudGVZ5AnxXcJgK08jolD7ovvggcdr28MnfVRMc="
