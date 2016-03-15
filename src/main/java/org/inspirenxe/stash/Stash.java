@@ -27,32 +27,30 @@ package org.inspirenxe.stash;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
+import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.inspirenxe.stash.nodes.CommentedDefaultNode;
+import org.inspirenxe.stash.nodes.DefaultNode;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongepowered.api.plugin.PluginContainer;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
-@SuppressWarnings("rawtypes")
 public class Stash {
 
-    private ConfigurationLoader<CommentedConfigurationNode> loader;
-    private CommentedConfigurationNode rootNode;
+    private ConfigurationLoader<? extends ConfigurationNode> loader;
+    private ConfigurationNode rootNode;
     private final File configuration;
     private final List<DefaultNode> defaultNodes = Lists.newArrayList();
     private final Logger logger;
 
-    public Stash(PluginContainer container, File configuration, ConfigurationLoader<CommentedConfigurationNode> loader) {
-        logger = LoggerFactory.getLogger(container.getName() + " - Stash");
+    public Stash(Logger logger, File configuration, ConfigurationLoader<? extends ConfigurationNode> loader) {
+        this.logger = logger;
         this.loader = loader;
         this.configuration = configuration;
-        this.init();
     }
 
     /**
@@ -68,7 +66,7 @@ public class Stash {
             }
         }
         try {
-            rootNode = this.loader.load();
+            rootNode = loader.load();
         } catch (IOException e) {
             logger.error("Unable to load configuration file!", e);
         }
@@ -81,27 +79,30 @@ public class Stash {
      */
     @SuppressWarnings("unchecked")
     public Stash load() {
+        try {
+            rootNode = loader.load();
+        } catch (IOException e) {
+            logger.error("Unable to load configuration!", e);
+        }
         defaultNodes.stream().filter(entry -> entry.value != null).forEach(entry -> {
-            final CommentedConfigurationNode node = getChildNode(entry.key);
+            final ConfigurationNode node = getChildNode(entry.key);
             if (node.getValue() == null) {
                 if (entry.type.isPresent()) {
                     try {
                         getChildNode(entry.key).setValue(TypeToken.of((Class<Object>) entry.type.get()), entry.value);
-                        getChildNode(entry.key).setComment(entry.comment);
+                        if (entry instanceof CommentedDefaultNode && loader instanceof CommentedConfigurationNode) {
+                            ((CommentedConfigurationNode) getChildNode(entry.key)).setComment(((CommentedDefaultNode) entry).comment);
+                        }
                     } catch (ObjectMappingException e) {
                         logger.warn("Unable to map TypeToken!", e);
                     }
                 } else {
-                    getChildNode(entry.key).setValue(entry.value).setComment(entry.comment);
+                    if (entry instanceof CommentedDefaultNode) {
+                        ((CommentedConfigurationNode) getChildNode(entry.key)).setComment(((CommentedDefaultNode) entry).comment);
+                    }
                 }
             }
         });
-        save();
-        try {
-            loader.load();
-        } catch (IOException e) {
-            logger.error("Unable to load configuration!", e);
-        }
         return this;
     }
 
@@ -139,16 +140,14 @@ public class Stash {
                 defaultNodes.add(node);
             }
         }
-        this.save();
-        this.load();
     }
 
     /**
      * Gets the node from the root node.
      * @param path The path to the node split by periods.
-     * @return The {@link CommentedConfigurationNode}.
+     * @return The {@link ConfigurationNode}.
      */
-    public CommentedConfigurationNode getChildNode(String path) {
+    public ConfigurationNode getChildNode(String path) {
         return rootNode.getNode((Object[]) path.split("\\."));
     }
 
@@ -176,86 +175,5 @@ public class Stash {
         }
         // Return a value even if the token doesn't successfully map
         return (T) getChildNode(path).getValue();
-    }
-
-    public static class DefaultNode<T> {
-
-        public String key;
-        public T value;
-        public String comment;
-        public final Optional<Class<T>> type;
-
-        public DefaultNode(String key, T value, String comment, Optional<Class<T>> type) {
-            this.key = key;
-            this.value = value;
-            this.comment = comment;
-            this.type = type;
-        }
-
-        public static <T> Builder<T> builder(Class<T> clazz) {
-            return new Builder<>();
-        }
-
-        public static class Builder<T> {
-
-            private String key = "";
-            private T value = null;
-            private String comment = "";
-            private Optional<Class<T>> type = Optional.empty();
-
-            /**
-             * Sets the path key for the {@link DefaultNode}.
-             * @param key The path to register.
-             * <p>The key is split by a period. For example "path.to.node" is the equivalent of...
-             * path {
-             *     to {
-             *         node=""
-             *     }
-             * }</p>
-             * @return The builder.
-             */
-            public Builder<T> key(String key) {
-                this.key = key;
-                return this;
-            }
-
-            /**
-             * Sets the value for the {@link DefaultNode}.
-             * @param value The value to register.
-             * @return The builder.
-             */
-            public Builder<T> value(T value) {
-                this.value = value;
-                return this;
-            }
-
-            /**
-             * Sets the comment for the {@link DefaultNode}.
-             * @param comment The comment to register.
-             * @return The builder.
-             */
-            public Builder<T> comment(String comment) {
-                this.comment = comment;
-                return this;
-            }
-
-            /**
-             * Sets the type for the {@link DefaultNode}.
-             * @param type The class to use for {@link TypeToken} mapping.
-             * @return The builder.
-             */
-            public Builder<T> type(Optional<Class<T>> type) {
-                this.type = type;
-                return this;
-            }
-
-            /**
-             * Build the {@link DefaultNode}.
-             * @return A new copy of {@link DefaultNode}.
-             */
-            public DefaultNode<T> build() {
-                return new DefaultNode<>(key, value, comment, type);
-            }
-        }
     }
 }
