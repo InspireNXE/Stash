@@ -24,8 +24,6 @@
  */
 package org.inspirenxe.stash.nodes;
 
-import com.google.common.reflect.TypeToken;
-
 import java.util.Optional;
 
 public class DefaultNode<T> {
@@ -45,7 +43,7 @@ public class DefaultNode<T> {
     }
 
     public static <T> Builder<T> builder(Class<T> clazz) {
-        return new Builder<>();
+        return new Builder<>(clazz);
     }
 
     public static class Builder<T> {
@@ -53,6 +51,17 @@ public class DefaultNode<T> {
         protected String key = "";
         protected T value = null;
         protected Optional<Class<T>> type = Optional.empty();
+
+        protected Builder() {
+        }
+
+        /**
+         * Sets the type for the {@link DefaultNode}.
+         * @param clazz The class to use for {@link com.google.common.reflect.TypeToken} mapping.
+         */
+        protected Builder(Class<T> clazz) {
+            this.type = Optional.of(clazz);
+        }
 
         /**
          * Sets the path key for the {@link DefaultNode}.
@@ -77,16 +86,6 @@ public class DefaultNode<T> {
          */
         public Builder<T> value(T value) {
             this.value = value;
-            return this;
-        }
-
-        /**
-         * Sets the type for the {@link DefaultNode}.
-         * @param type The class to use for {@link TypeToken} mapping.
-         * @return The builder.
-         */
-        public Builder<T> type(Optional<Class<T>> type) {
-            this.type = type;
             return this;
         }
 

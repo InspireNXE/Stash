@@ -45,8 +45,9 @@ public class Stash {
     private ConfigurationLoader<? extends ConfigurationNode> loader;
     private ConfigurationNode rootNode;
     private final File configuration;
-    private final List<DefaultNode> defaultNodes = Lists.newArrayList();
     private final Logger logger;
+    @SuppressWarnings("rawtypes")
+    private final List<DefaultNode> defaultNodes = Lists.newArrayList();
 
     public Stash(Logger logger, File configuration, ConfigurationLoader<? extends ConfigurationNode> loader) {
         this.logger = logger;
@@ -125,16 +126,15 @@ public class Stash {
      * @param node The {@link DefaultNode} to register.
      */
     @SuppressWarnings("unchecked")
-    public void registerDefaultNode(DefaultNode node) {
+    public <T> void registerDefaultNode(DefaultNode<T> node) {
         final String[] nodes = node.key.split("\\.");
         final List<String> currentPath = Lists.newArrayList();
         for (int i = 0; i < nodes.length; i++) {
             if (i < nodes.length - 1) {
                 currentPath.add(i, nodes[i]);
                 final String joinedPath = Joiner.on(",").skipNulls().join(currentPath).replace(",", ".");
-                defaultNodes.add(new DefaultNode.Builder()
+                defaultNodes.add(new DefaultNode.Builder<T>()
                         .key(joinedPath)
-                        .type(node.type)
                         .build()
                 );
             } else {

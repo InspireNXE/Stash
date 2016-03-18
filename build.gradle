@@ -28,6 +28,7 @@ repositories {
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.18'
     compile 'ninja.leaping.configurate:configurate-core:3.1.1'
+    compile 'ninja.leaping.configurate:configurate-hocon:3.1.1'
 }
 
 configure([compileJava, compileTestJava]) {

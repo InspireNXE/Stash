@@ -40,12 +40,24 @@ public class CommentedDefaultNode<T> extends DefaultNode<T> {
     }
 
     public static <T> Builder<T> builder(Class<T> clazz) {
-        return new Builder<>();
+        return new Builder<>(clazz);
     }
 
     public static class Builder<T> extends DefaultNode.Builder<T> {
 
         private String comment = null;
+
+        protected Builder() {
+            super();
+        }
+
+        /**
+         * Sets the type for the {@link DefaultNode}.
+         * @param clazz The class to use for {@link com.google.common.reflect.TypeToken} mapping.
+         */
+        protected Builder(Class<T> clazz) {
+            super(clazz);
+        }
 
         @Override
         public Builder<T> key(String key) {
@@ -55,11 +67,6 @@ public class CommentedDefaultNode<T> extends DefaultNode<T> {
         @Override
         public Builder<T> value(T value) {
             return (Builder<T>) super.value(value);
-        }
-
-        @Override
-        public Builder<T> type(Optional<Class<T>> type) {
-            return (Builder<T>) super.type(type);
         }
 
         /**
