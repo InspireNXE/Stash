@@ -52,14 +52,14 @@ public class DefaultNode<T> {
         protected T value = null;
         protected Optional<Class<T>> type = Optional.empty();
 
-        protected Builder() {
+        public Builder() {
         }
 
         /**
          * Sets the type for the {@link DefaultNode}.
          * @param clazz The class to use for {@link com.google.common.reflect.TypeToken} mapping.
          */
-        protected Builder(Class<T> clazz) {
+        public Builder(Class<T> clazz) {
             this.type = Optional.of(clazz);
         }
 

@@ -47,7 +47,7 @@ public class CommentedDefaultNode<T> extends DefaultNode<T> {
 
         private String comment = null;
 
-        protected Builder() {
+        public Builder() {
             super();
         }
 
@@ -55,7 +55,7 @@ public class CommentedDefaultNode<T> extends DefaultNode<T> {
          * Sets the type for the {@link DefaultNode}.
          * @param clazz The class to use for {@link com.google.common.reflect.TypeToken} mapping.
          */
-        protected Builder(Class<T> clazz) {
+        public Builder(Class<T> clazz) {
             super(clazz);
         }
 
