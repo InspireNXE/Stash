@@ -99,17 +99,15 @@ public class Stash {
             if (node.getValue() == null) {
                 if (entry.type.isPresent()) {
                     try {
-                        getChildNode(entry.key).setValue(TypeToken.of((Class<Object>) entry.type.get()), entry.value);
-                        if (entry instanceof CommentedDefaultNode && loader instanceof HoconConfigurationLoader) {
-                            ((CommentedConfigurationNode) this.getChildNode(entry.key)).setComment(((CommentedDefaultNode) entry).comment);
-                        }
+                        node.setValue(TypeToken.of((Class<Object>) entry.type.get()), entry.value);
                     } catch (ObjectMappingException e) {
                         logger.warn("Unable to map TypeToken!", e);
                     }
                 } else {
-                    if (entry instanceof CommentedDefaultNode && loader instanceof HoconConfigurationLoader) {
-                        ((CommentedConfigurationNode) this.getChildNode(entry.key)).setComment(((CommentedDefaultNode) entry).comment);
-                    }
+                    node.setValue(entry.value);
+                }
+                if (entry instanceof CommentedDefaultNode && loader instanceof HoconConfigurationLoader) {
+                    ((CommentedConfigurationNode) node).setComment(((CommentedDefaultNode) entry).comment);
                 }
             }
         });
