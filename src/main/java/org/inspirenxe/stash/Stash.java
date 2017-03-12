@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public class Stash {
 
@@ -140,6 +139,14 @@ public class Stash {
                 defaultNodes.add(node);
             }
         }
+    }
+
+    /**
+     * Gets the root node of the configuration file.
+     * @return The root node.
+     */
+    public final ConfigurationNode getRootNode() {
+        return this.rootNode;
     }
 
     /**
