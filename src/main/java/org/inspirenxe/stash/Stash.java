@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class Stash {
 
@@ -95,19 +96,19 @@ public class Stash {
     @SuppressWarnings("unchecked")
     public Stash save() {
         defaultNodes.stream().filter(entry -> entry.value != null).forEach(entry -> {
-            final ConfigurationNode node = getChildNode(entry.key);
-            if (node.getValue() == null) {
+            final Optional<ConfigurationNode> optNode = getChildNode(entry.key);
+            if (optNode.isPresent() && optNode.get().getValue() == null) {
                 if (entry.type.isPresent()) {
                     try {
-                        node.setValue(TypeToken.of((Class<Object>) entry.type.get()), entry.value);
+                        optNode.get().setValue(TypeToken.of((Class<Object>) entry.type.get()), entry.value);
                     } catch (ObjectMappingException e) {
                         logger.warn("Unable to map TypeToken!", e);
                     }
                 } else {
-                    node.setValue(entry.value);
+                    optNode.get().setValue(entry.value);
                 }
                 if (entry instanceof CommentedDefaultNode && loader instanceof HoconConfigurationLoader) {
-                    ((CommentedConfigurationNode) node).setComment(((CommentedDefaultNode) entry).comment);
+                    ((CommentedConfigurationNode) optNode.get()).setComment(((CommentedDefaultNode) entry).comment);
                 }
             }
         });
@@ -146,8 +147,8 @@ public class Stash {
      * @param path The path to the node split by periods.
      * @return The {@link ConfigurationNode}.
      */
-    public ConfigurationNode getChildNode(String path) {
-        return rootNode.getNode((Object[]) path.split("\\."));
+    public Optional<ConfigurationNode> getChildNode(String path) {
+        return Optional.ofNullable(rootNode.getNode((Object[]) path.split("\\.")));
     }
 
     /**
@@ -155,8 +156,9 @@ public class Stash {
      * @param path The path of the value to get.
      * @return The object value.
      */
-    public Object getChildNodeValue(String path) {
-        return getChildNode(path).getValue();
+    public Optional<Object> getChildNodeValue(String path) {
+        final Optional<ConfigurationNode> node = getChildNode(path);
+        return node.isPresent() ? Optional.ofNullable(node.get().getValue()) : Optional.empty();
     }
 
     /**
@@ -167,12 +169,16 @@ public class Stash {
      */
     @SuppressWarnings("unchecked")
     public <T> T getChildNodeValue(String path, Class<T> clazz) {
+        final Optional<ConfigurationNode> node = getChildNode(path);
         try {
-            return getChildNode(path).getValue(TypeToken.of(clazz));
+            if (node.isPresent()) {
+                node.get().getValue(TypeToken.of(clazz));
+            }
         } catch (ObjectMappingException e) {
             logger.error("Unable to map object to TypeToken", e);
         }
+
         // Return a value even if the token doesn't successfully map
-        return (T) getChildNode(path).getValue();
+        return node.isPresent() ? (T) node.get().getValue() : null;
     }
 }

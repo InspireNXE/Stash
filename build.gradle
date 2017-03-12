@@ -2,7 +2,7 @@ plugins {
   id "java"
   id "maven"
   id "signing"
-  id "com.github.hierynomus.license" version "0.12.1"
+  id "com.github.hierynomus.license" version "0.13.1"
 }
 
 defaultTasks 'clean', 'licenseFormat', 'build'
@@ -26,9 +26,9 @@ repositories {
 }
 
 dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.18'
-    compile 'ninja.leaping.configurate:configurate-core:3.1.1'
-    compile 'ninja.leaping.configurate:configurate-hocon:3.1.1'
+    compile 'org.slf4j:slf4j-api:1.7.24'
+    compile 'ninja.leaping.configurate:configurate-core:3.2'
+    compile 'ninja.leaping.configurate:configurate-hocon:3.2'
 }
 
 configure([compileJava, compileTestJava]) {
